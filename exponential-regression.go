@@ -140,7 +140,7 @@ func (r *Regression) Run() error {
 	}
 	reg := regression.Regression{}
 	for _, val := range r.input.values {
-		reg.Train(regression.DataPoint(val.x,[]float64{val.y}))
+		reg.Train(regression.DataPoint(val.y,[]float64{val.x}))
 	}
 	err := reg.Run()
 	if err != nil {
