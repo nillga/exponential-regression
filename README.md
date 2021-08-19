@@ -10,6 +10,10 @@ In such cases one has to switch to a polynomial or exponential regression. The d
 growth and growth expectance of the data. If this growth is in a similar extreme way as an exponential function 
 (first a huge amount of almost no growth, then explosive growth) exponential regression should be the way.
 
+## How to install
+
+    $ go get github.com/nillga/exponential-regression
+
 ## Example Usage
 
 Caution: This example absolutely ignores error handling!
