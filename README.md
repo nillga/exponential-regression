@@ -36,7 +36,7 @@ func main() {
     r.Run()
     a,b,_ := r.Result()
 
-    fmt.Printf("Regression formula:\ny=e^(%.4f+%.4f*x\n", a,b)
+    fmt.Printf("Regression formula:\ny=e^(%.4f+%.4f*x\n",a,b)
 }
 ```
 
