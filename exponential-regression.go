@@ -53,7 +53,7 @@ func (r *Regression) Init (s []struct{
 		return ErrAlreadyInitialized
 	}
 	for i := range s {
-		err := r.Append(s[i])
+		err := r.Append(s[i].x, s[i].y)
 		if err != nil {
 			return err
 		}
@@ -62,22 +62,19 @@ func (r *Regression) Init (s []struct{
 	return nil
 }
 
-func (r *Regression) Append (s struct{
-	x float64
-	y float64
-}) error {
+func (r *Regression) Append (x,y float64) error {
 	if r.input.converted {
 		return ErrAlreadyConverted
 	}
-	if s.y < 0 {
+	if y < 0 {
 		return ErrNegativeValue
 	}
-	if r.input.hasAlready(s.x) {
+	if r.input.hasAlready(x) {
 		return nil
 	}
 
-	r.input.values = append(r.input.values, Value{s.x,s.y})
-	r.input.covered = append(r.input.covered, s.x)
+	r.input.values = append(r.input.values, Value{x,y})
+	r.input.covered = append(r.input.covered, x)
 	r.initialized = true
 	return nil
 }

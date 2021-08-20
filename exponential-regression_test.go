@@ -61,10 +61,7 @@ func TestRegression_Init (t *testing.T) {
 func TestRegression_Append (t *testing.T) {
 	t.Run("No Conversion yet", func(t *testing.T) {
 		test := Regression{}
-		err := test.Append(struct{
-			x float64
-			y float64
-		}{2.0,3.0})
+		err := test.Append(2.0,3.0)
 		if err != nil {
 			t.Errorf("Unexpected error was thrown: %v", err)
 		}
@@ -81,10 +78,7 @@ func TestRegression_Append (t *testing.T) {
 	t.Run("Converted already", func(t *testing.T) {
 		test := Regression{}
 		test.input.converted = true
-		err := test.Append(struct{
-			x float64
-			y float64
-		}{2.0,3.0})
+		err := test.Append(2.0,3.0)
 		if err == nil {
 			t.Errorf("No error has been thrown")
 		}
@@ -92,10 +86,7 @@ func TestRegression_Append (t *testing.T) {
 	t.Run("Already initialized reg", func(t *testing.T) {
 		test := Regression{}
 		_ = test.Init(mockInput)
-		err := test.Append(struct{
-			x float64
-			y float64
-		}{4.0,5.0})
+		err := test.Append(4.0,5.0)
 
 		if err != nil {
 			t.Errorf("Wrongful error was thrown: %v", err)
@@ -108,19 +99,13 @@ func TestRegression_Append (t *testing.T) {
 	})
 	t.Run("Negative Value", func(t *testing.T) {
 		test := Regression{}
-		err := test.Append(struct {
-			x float64
-			y float64
-		}{x: 5, y: -1})
+		err := test.Append(5, -1)
 		assertError(err, ErrNegativeValue, t)
 	})
 	t.Run("Multiple appearance of same x", func(t *testing.T) {
 		test := Regression{}
 		_ = test.Init(mockInput)
-		err := test.Append(struct {
-			x float64
-			y float64
-		}{x: 3, y: 4})
+		err := test.Append(3, 4)
 
 		if err != nil {
 			t.Errorf("Unexpected error occured: %v", err)
