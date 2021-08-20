@@ -44,6 +44,12 @@ func main() {
 }
 ```
 
+The output of this example will look like this:
+
+    $ Regression formula:
+      y=1.2036*1.6098^x
+    $
+
 ## Realisation
 
 This package uses the base logic of this package: github.com/sajari/regression
@@ -74,5 +80,9 @@ ln(a) and ln(b) are constants, so we do end up with a linear equation.
 5.) LReg(x,ln(y)) ==> ln(y) = c + m*x
 
 6.) Now we need to bring this back into shape: y = e^(c+m*x)
+
+7.) This can be re-dragged again: y = e^c * e^(m*x)
+
+8.) And finally in the shape of y = a * b^x: y = e^c * (e^m)^x
 
 As easy as this, we have our exponential regression done.
