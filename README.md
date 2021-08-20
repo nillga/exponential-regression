@@ -27,7 +27,7 @@ import (
 )
 
 func main() {
-    r := new(exponential-regression.Regression)
+    r := exponential-regression.Regression{}
     r.Init([]struct{
         x float64
         y float64
@@ -35,12 +35,12 @@ func main() {
         {1.0, 2.2},{1.1, 2.2},{1.2, 2.22},{1.3, 2.23},
         {1.4, 2.26},{1.5, 2.28},{1.6, 2.3},{1.7, 2.35},
         {1.8, 2.43},{1.9, 2.6},{2.0, 3.2},{2.1, 4.8},
-    )
+    })
     r.Convert()
     r.Run()
     a,b,_ := r.Result()
 
-    fmt.Printf("Regression formula:\ny=e^(%.4f+%.4f*x\n",a,b)
+    fmt.Printf("Regression formula:\ny=%.4f*%.4f^x\n",a,b)
 }
 ```
 
