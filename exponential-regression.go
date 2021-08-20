@@ -144,7 +144,7 @@ func (r *Regression) Run() error {
 		r.output = Output{err: err}
 		return ErrLinearRegression
 	}
-	r.output = *FormulaToOutput(reg.Formula)
+	r.output = Output{reg.Coeff(0),reg.Coeff(1), false, nil}
 	r.ran = true
 	return nil
 }
