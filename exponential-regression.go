@@ -73,6 +73,42 @@ func (r *Regression) Append (x,y float64) error {
 	return nil
 }
 
+func (r *Regression) Convert() error {
+	return r.input.convert()
+}
+
+func (r *Regression) Run() error {
+	if !r.input.converted {
+		return ErrNotConverted
+	}
+	if r.ran {
+		return ErrRanAlready
+	}
+	reg := regression.Regression{}
+	for _, val := range r.input.values {
+		reg.Train(regression.DataPoint(val.y,[]float64{val.x}))
+	}
+	err := reg.Run()
+	if err != nil {
+		r.output = Output{err: err}
+		return ErrLinearRegression
+	}
+	r.output = Output{reg.Coeff(0),reg.Coeff(1), false, nil}
+	r.ran = true
+	return nil
+}
+
+func (r *Regression) Result() (float64, float64, error) {
+	if !r.ran {
+		return 0,0,ErrNotRan
+	}
+	if err := r.output.convert(); err != nil {
+		return 0,0,err
+	}
+
+	return r.output.a, r.output.b, nil
+}
+
 func (i *Input) convert() error {
 	if len(i.values) < 2 {
 		return ErrNotEnoughData
@@ -100,31 +136,6 @@ func (o *Output) convert() error {
 	return nil
 }
 
-func (r *Regression) Convert() error {
-	return r.input.convert()
-}
-
-func (r *Regression) Run() error {
-	if !r.input.converted {
-		return ErrNotConverted
-	}
-	if r.ran {
-		return ErrRanAlready
-	}
-	reg := regression.Regression{}
-	for _, val := range r.input.values {
-		reg.Train(regression.DataPoint(val.y,[]float64{val.x}))
-	}
-	err := reg.Run()
-	if err != nil {
-		r.output = Output{err: err}
-		return ErrLinearRegression
-	}
-	r.output = Output{reg.Coeff(0),reg.Coeff(1), false, nil}
-	r.ran = true
-	return nil
-}
-
 func (i *Input) hasAlready(find float64) bool {
 	for j := range i.covered {
 		if i.covered[j] == find {
@@ -132,15 +143,4 @@ func (i *Input) hasAlready(find float64) bool {
 		}
 	}
 	return false
-}
-
-func (r *Regression) Result() (float64, float64, error) {
-	if !r.ran {
-		return 0,0,ErrNotRan
-	}
-	if err := r.output.convert(); err != nil {
-		return 0,0,err
-	}
-
-	return r.output.a, r.output.b, nil
 }
