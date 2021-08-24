@@ -2,7 +2,6 @@ package exponential_regression
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"testing"
 )
@@ -116,13 +115,13 @@ func TestRegression_Append (t *testing.T) {
 	})
 }
 
-func TestInput_Convert (t *testing.T) {
+func TestInput_convert (t *testing.T) {
 	t.Run("optimal case", func(t *testing.T) {
 		test := Regression{}
 		_ = test.Init(mockMap)
 		input := test.input
 
-		err := input.Convert()
+		err := input.convert()
 		if err != nil {
 			t.Errorf("Wrongful error was thrown")
 		}
@@ -134,7 +133,7 @@ func TestInput_Convert (t *testing.T) {
 	t.Run("Little sample size", func(t *testing.T) {
 		t.Run("No data", func(t *testing.T) {
 			test := Input{}
-			err := test.Convert()
+			err := test.convert()
 
 			if err ==  nil {
 				t.Errorf("No error was thrown")
@@ -145,7 +144,7 @@ func TestInput_Convert (t *testing.T) {
 		})
 		t.Run("Not enough data", func(t *testing.T) {
 			test := Input{values: []Value{{2,3}}}
-			err := test.Convert()
+			err := test.convert()
 
 			if err ==  nil {
 				t.Errorf("No error was thrown")
@@ -161,15 +160,15 @@ func TestInput_Convert (t *testing.T) {
 		input := test.input
 		input.converted = true
 
-		err := input.Convert()
+		err := input.convert()
 		assertError(err, ErrAlreadyConverted, t)
 	})
 }
 
-func TestOutput_Convert (t *testing.T) {
+func TestOutput_convert (t *testing.T) {
 	t.Run("optimal case", func(t *testing.T) {
 		test := Output{}
-		err := test.Convert()
+		err := test.convert()
 
 		if err != nil {
 			t.Errorf("Wrongful error appeared: %v", err)
@@ -183,41 +182,13 @@ func TestOutput_Convert (t *testing.T) {
 	})
 	t.Run("already converted", func(t *testing.T) {
 		test := Output{converted: true}
-		err := test.Convert()
+		err := test.convert()
 		assertError(err, ErrAlreadyConverted, t)
 	})
 	t.Run("imported error", func(t *testing.T) {
 		test := Output{err: errors.New("")}
-		err := test.Convert()
+		err := test.convert()
 		assertError(err, ErrLinearRegression, t)
-	})
-}
-
-func TestFormulaToOutput (t *testing.T) {
-	formulaWithEmptyVarName := fmt.Sprintf("Predicted = %.4f + %v*%.4f", 1.0,"X0",1.5)
-	formulaWithBrokenC := fmt.Sprintf("Predicted = test + %v*%.4f", "X0",1.5)
-	formulaWithBrokenM := fmt.Sprintf("Predicted = %.4f + %v*test", 1.0,"X0")
-	t.Run("Optimal Case", func(t *testing.T) {
-		got := FormulaToOutput(formulaWithEmptyVarName)
-		want := Output{a:1,b:1.5}
-
-		if *got != want {
-			t.Errorf("Got: %v but expected: %v", got, want)
-		}
-	})
-	t.Run("Error thrown", func(t *testing.T) {
-		got := FormulaToOutput("")
-		assertError(got.err, ErrInvalidFormula, t)
-	})
-	t.Run("Invalid Numbers", func(t *testing.T) {
-		t.Run("a", func(t *testing.T) {
-			got := FormulaToOutput(formulaWithBrokenC)
-			assertError(got.err, ErrInvalidFormula, t)
-		})
-		t.Run("b", func(t *testing.T) {
-			got := FormulaToOutput(formulaWithBrokenM)
-			assertError(got.err, ErrInvalidFormula, t)
-		})
 	})
 }
 

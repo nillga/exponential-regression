@@ -4,8 +4,6 @@ import (
 	"errors"
 	"github.com/sajari/regression"
 	"math"
-	"strconv"
-	"strings"
 )
 
 var (
@@ -13,7 +11,6 @@ var (
 	ErrAlreadyConverted = errors.New("data has been converted already")
 	ErrNotEnoughData = errors.New("sample size is too small")
 	ErrLinearRegression = errors.New("error at Linear Regression Level")
-	ErrInvalidFormula = errors.New("incompilable formula")
 	ErrNotConverted = errors.New("unconverted data")
 	ErrNegativeValue = errors.New("negative Value -> No exponential regression possible")
 	ErrRanAlready = errors.New("regression was run already")
@@ -76,7 +73,7 @@ func (r *Regression) Append (x,y float64) error {
 	return nil
 }
 
-func (i *Input) Convert() error {
+func (i *Input) convert() error {
 	if len(i.values) < 2 {
 		return ErrNotEnoughData
 	}
@@ -91,7 +88,7 @@ func (i *Input) Convert() error {
 	return nil
 }
 
-func (o *Output) Convert() error {
+func (o *Output) convert() error {
 	if o.converted {
 		return ErrAlreadyConverted
 	}
@@ -103,26 +100,8 @@ func (o *Output) Convert() error {
 	return nil
 }
 
-func FormulaToOutput(formula string) *Output {
-	members := strings.Split(formula, " ")
-	if len(members) != 5 {
-		return &Output{err: ErrInvalidFormula}
-	}
-	stringA := members[2]
-	stringB := members[4][3:]
-	a, err := strconv.ParseFloat(stringA, 64)
-	if err != nil {
-		return &Output{err: ErrInvalidFormula}
-	}
-	b, err := strconv.ParseFloat(stringB, 64)
-	if err != nil {
-		return &Output{err: ErrInvalidFormula}
-	}
-	return &Output{a: a,b: b}
-}
-
 func (r *Regression) Convert() error {
-	return r.input.Convert()
+	return r.input.convert()
 }
 
 func (r *Regression) Run() error {
@@ -159,7 +138,7 @@ func (r *Regression) Result() (float64, float64, error) {
 	if !r.ran {
 		return 0,0,ErrNotRan
 	}
-	if err := r.output.Convert(); err != nil {
+	if err := r.output.convert(); err != nil {
 		return 0,0,err
 	}
 
