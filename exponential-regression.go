@@ -45,15 +45,12 @@ type Regression struct {
 	output Output
 }
 
-func (r *Regression) Init (s []struct{
-	x float64
-	y float64
-}) error {
+func (r *Regression) Init (m map[float64]float64) error {
 	if r.initialized {
 		return ErrAlreadyInitialized
 	}
-	for i := range s {
-		err := r.Append(s[i].x, s[i].y)
+	for x,y := range m {
+		err := r.Append(x, y)
 		if err != nil {
 			return err
 		}

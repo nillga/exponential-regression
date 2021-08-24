@@ -20,26 +20,29 @@ var (
 	}{
 		{1, math.Log(2)},{2, math.Log(3)},{3, math.Log(4)},
 	}
+
+	mockMap = map[float64]float64{
+		1.0:2.0,
+		2.0:3.0,
+		3.0:4.0,
+	}
 )
 
 func TestRegression_Init (t *testing.T) {
 	t.Run("Initialize empty", func(t *testing.T) {
 		test := Regression{}
-		err := test.Init(mockInput)
+		err := test.Init(mockMap)
 		if err != nil {
 			t.Errorf("States initialization while there was none yet")
 		}
 		if test.input.converted {
 			t.Errorf("Input field states conversion while there is none")
 		}
-		if index, neq := test.input.assert(mockInput); neq {
-			t.Errorf("Error at index %d: Got {%.4f,%.4f} but wanted {%.4f,%.4f}", index,
-				test.input.values[index].x,test.input.values[index].y, mockInput[index].x, mockInput[index].y)
-		}
+		test.input.assert(mockInput, t)
 	})
 	t.Run("Already initialized", func(t *testing.T) {
 		test := Regression{initialized: true}
-		err := test.Init(mockInput)
+		err := test.Init(mockMap)
 		if err == nil {
 			t.Errorf("No error was thrown")
 		}
@@ -49,10 +52,7 @@ func TestRegression_Init (t *testing.T) {
 	})
 	t.Run("Negative Value", func(t *testing.T) {
 		test := Regression{}
-		err := test.Init([]struct {
-			x float64
-			y float64
-		}{{1,-1}})
+		err := test.Init(map[float64]float64{0.0:-1.0})
 
 		assertError(err, ErrNegativeValue, t)
 	})
@@ -85,7 +85,7 @@ func TestRegression_Append (t *testing.T) {
 	})
 	t.Run("Already initialized reg", func(t *testing.T) {
 		test := Regression{}
-		_ = test.Init(mockInput)
+		_ = test.Init(mockMap)
 		err := test.Append(4.0,5.0)
 
 		if err != nil {
@@ -104,7 +104,7 @@ func TestRegression_Append (t *testing.T) {
 	})
 	t.Run("Multiple appearance of same x", func(t *testing.T) {
 		test := Regression{}
-		_ = test.Init(mockInput)
+		_ = test.Init(mockMap)
 		err := test.Append(3, 4)
 
 		if err != nil {
@@ -119,20 +119,17 @@ func TestRegression_Append (t *testing.T) {
 func TestInput_Convert (t *testing.T) {
 	t.Run("optimal case", func(t *testing.T) {
 		test := Regression{}
-		_ = test.Init(mockInput)
+		_ = test.Init(mockMap)
 		input := test.input
 
 		err := input.Convert()
 		if err != nil {
 			t.Errorf("Wrongful error was thrown")
 		}
-		if index, neq := input.assert(mockConv); neq {
-			t.Errorf("Error at index %d: Got {%.4f,%.4f} but wanted {%.4f,%.4f}", index,
-				test.input.values[index].x,test.input.values[index].y, mockConv[index].x, mockConv[index].y)
-		}
 		if !input.converted {
 			t.Errorf("Conversion was not documented")
 		}
+		input.assert(mockConv, t)
 	})
 	t.Run("Little sample size", func(t *testing.T) {
 		t.Run("No data", func(t *testing.T) {
@@ -160,7 +157,7 @@ func TestInput_Convert (t *testing.T) {
 	})
 	t.Run("Already converted data", func(t *testing.T) {
 		test := Regression{}
-		_ = test.Init(mockInput)
+		_ = test.Init(mockMap)
 		input := test.input
 		input.converted = true
 
@@ -227,7 +224,7 @@ func TestFormulaToOutput (t *testing.T) {
 func TestRegression_Run (t *testing.T) {
 	t.Run("Optimal Case", func(t *testing.T) {
 		test := Regression{}
-		_ = test.Init(mockInput)
+		_ = test.Init(mockMap)
 		_ = test.Convert()
 
 		err := test.Run()
@@ -241,7 +238,7 @@ func TestRegression_Run (t *testing.T) {
 	})
 	t.Run("Non converted Values", func(t *testing.T) {
 		test := Regression{}
-		_ = test.Init(mockInput)
+		_ = test.Init(mockMap)
 
 		err := test.Run()
 
@@ -261,13 +258,19 @@ func TestRegression_Run (t *testing.T) {
 
 	t.Run("Example", func(t *testing.T){
 		r := Regression{}
-		r.Init([]struct{
-			x float64
-			y float64
-		}{
-			{1.0, 2.2},{1.1, 2.2},{1.2, 2.22},{1.3, 2.23},
-			{1.4, 2.26},{1.5, 2.28},{1.6, 2.3},{1.7, 2.35},
-			{1.8, 2.43},{1.9, 2.6},{2.0, 3.2},{2.1, 4.8},
+		r.Init(map[float64]float64{
+			1.0: 2.2,
+			1.1: 2.2,
+			1.2: 2.22,
+			1.3: 2.23,
+			1.4: 2.26,
+			1.5: 2.28,
+			1.6: 2.3,
+			1.7: 2.35,
+			1.8: 2.43,
+			1.9: 2.6,
+			2.0: 3.2,
+			2.1: 4.8,
 		})
 		r.Convert()
 		r.Run()
@@ -279,7 +282,7 @@ func TestRegression_Run (t *testing.T) {
 
 func TestInput_hasAlready (t *testing.T) {
 	temp := Regression{}
-	_ = temp.Init(mockInput)
+	_ = temp.Init(mockMap)
 
 	test := temp.input
 	t.Run("find", func(t *testing.T) {
@@ -301,7 +304,7 @@ func TestInput_hasAlready (t *testing.T) {
 func TestRegression_Result(t *testing.T) {
 	t.Run("Optimal Case", func(t *testing.T) {
 		test := Regression{}
-		_ = test.Init(mockInput)
+		_ = test.Init(mockMap)
 		_ = test.Convert()
 		_ = test.Run()
 		_,_,err := test.Result()
@@ -333,16 +336,29 @@ func TestRegression_Result(t *testing.T) {
 func (i *Input) assert (s []struct{
 	x float64
 	y float64
-}) (int, bool) {
+}, t *testing.T) {
 	for j := range i.values {
-		if i.values[j].x != s[j].x {
-			return j, true
-		}
-		if i.values[j].y != s[j].y {
-			return j, true
+		if index, problem := i.find(s[j].x,s[j].y); problem {
+			if index < 0 {
+				t.Errorf("Error: Missing Fields Got %v but wanted %v",i.values,s)
+				return
+			}
+			t.Errorf("Error at index %d: Got {%.4f,%.4f} but wanted {%.4f,%.4f}", index,
+				i.values[index].x,i.values[index].y, s[index].x, s[index].y)
 		}
 	}
-	return 0, false
+}
+
+func (i *Input) find (x,y float64) (int,bool) {
+	for j := range i.values {
+		if i.values[j].x == x {
+			if i.values[j].y != y {
+				return j, true
+			}
+			return 0,false
+		}
+	}
+	return 0, true
 }
 
 func assertError(targ, ideal error, t *testing.T) {
